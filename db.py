@@ -1,9 +1,11 @@
 import json
 from tweet import Tweet
+import re
 
 def load_db():
     try:
-        with open('db.json', 'r') as f:
+        #todo add this in .env
+        with open('/Users/arditxhaferi/Documents/Projects/Kosovo-and-Serbia-Tweets/db.json', 'r') as f:
             data = json.loads(f.read())
 
         return data
@@ -15,5 +17,24 @@ def create_or_update_db(request):
     for data in request:
         db[data.id] = getattr(Tweet(**data), 'get')()
     
-    with open('db.json', 'w') as f:
+    with open('/Users/arditxhaferi/Documents/Projects/Kosovo-and-Serbia-Tweets/db.json', 'w') as f:
         f.write(json.dumps(db))
+
+def count_tweets_in_db():
+    return len(load_db())
+
+def generate_tweet_text_array():
+    text_array = []
+
+    data = load_db()
+    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
+    for tweet in data.keys():
+        text = re.sub(url_pattern, '', data[tweet]['text'])
+
+        for word in text.split():
+            if len(word) > 3:
+                text_array.append(word)
+
+    print(len(text_array))
+    return text_array
