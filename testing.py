@@ -6,11 +6,14 @@ from country_code import get_country_name
 from testing_repository import first
 # from cloud import create_cloud
 from tweepy_repo import get_tweet_date
+from line import line_chart, plot_tweets_sentiment
+from helper import *
 import json
 import uuid
 import time
-
-print(count_tweets_in_db())
+from langdetect import detect
+from lingua import Language, LanguageDetectorBuilder
+detector = LanguageDetectorBuilder.from_all_spoken_languages().build()
 
 data = load_db()
 dates = load_date_db()
@@ -18,16 +21,37 @@ labelsN = {}
 labelsUF = {}
 labelsU = {}
 labelsP = {}
-tweets_sentiment = {'2022-12-12': 0, '2022-12-13': 0, '2022-12-14': 0, '2022-12-15': 0, '2022-12-16': 0, '2022-12-20': 0, '2022-12-21': 0, '2022-12-22': 0, '2022-12-23': 0, '2022-12-25': 0, '2022-12-26': 0, '2022-12-27': 0, '2022-12-28': 0, '2022-12-29': 0, '2022-12-30': 0, '2023-01-01': 0, '2022-12-31': 0, '2023-01-02': 0, '2023-01-03': 0, '2023-01-04': 0, '2023-01-05': 0, '2023-01-06': 0, '2023-01-07': 0, '2023-01-08': 0, '2023-01-09': 0}
+tweets_sentiment = {}
 count = 0
 for tweet in list(data.keys()):
     id = data[tweet]['id']
     if str(id) in dates:
         date = dates[str(id)][0:10]
+        # language = data[tweet]['lang']
         text = data[tweet]['text']
-        tweets_sentiment[date] += polarity(text)
+        try:
+            language = detector.detect_language_of(text)
+            language = language._name_
+            count+= 1
+            print(count)
+        except:
+            language = "error"
         
-print(tweets_sentiment, count)
+
+        if language not in tweets_sentiment:
+            tweets_sentiment[language] = {}
+        if date not in tweets_sentiment[language]:
+            tweets_sentiment[language][date] = 0
+
+        tweets_sentiment[language][date] += polarity(text)
+
+
+        
+print(json.dumps(tweets_sentiment))
+# dates_formatted = map_remove_first_four_chars(list(tweets_sentiment.keys()))
+
+# plot_tweets_sentiment(tweets_sentiment)
+# line_chart(dates_formatted, tweets_sentiment.values(), "Sentiment from the dates 2022-12-12-2023-01-09", "Date", "Sentiment")
 
 # for labels in labelsU:
 #     if labelsU[labels] > 100:
