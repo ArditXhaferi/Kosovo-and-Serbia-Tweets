@@ -10,3 +10,8 @@ def eval(sentence):
         return "Neutral"
     else:
         return "Negative"
+
+def polarity(sentence):
+    blob = TextBlob(sentence)
+
+    return blob.sentiment.polarity

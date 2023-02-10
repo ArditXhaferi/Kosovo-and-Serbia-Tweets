@@ -1,11 +1,26 @@
 import json
 from tweet import Tweet
 import re
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def load_db():
     try:
         #todo add this in .env
-        with open('/Users/arditxhaferi/Documents/Projects/Kosovo-and-Serbia-Tweets/db.json', 'r') as f:
+        with open(os.getenv('DB_PATH'), 'r') as f:
+            data = json.loads(f.read())
+
+        return data
+    except:
+        return {}
+    
+def load_date_db():
+    try:
+        #todo add this in .env
+        with open(os.getenv('DATE_DB_PATH'), 'r') as f:
             data = json.loads(f.read())
 
         return data
@@ -17,7 +32,7 @@ def create_or_update_db(request):
     for data in request:
         db[data.id] = getattr(Tweet(**data), 'get')()
     
-    with open('/Users/arditxhaferi/Documents/Projects/Kosovo-and-Serbia-Tweets/db.json', 'w') as f:
+    with open(os.getenv('DB_PATH'), 'w') as f:
         f.write(json.dumps(db))
 
 def count_tweets_in_db():
