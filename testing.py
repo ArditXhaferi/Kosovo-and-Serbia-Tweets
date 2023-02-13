@@ -13,6 +13,7 @@ import uuid
 import time
 from langdetect import detect
 from lingua import Language, LanguageDetectorBuilder
+from translate import translate_text_to_english
 detector = LanguageDetectorBuilder.from_all_spoken_languages().build()
 
 data = load_db()
@@ -23,6 +24,9 @@ labelsU = {}
 labelsP = {}
 tweets_sentiment = {}
 count = 0
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+analyzer = SentimentIntensityAnalyzer()
+
 for tweet in list(data.keys()):
     id = data[tweet]['id']
     if str(id) in dates:
@@ -33,17 +37,21 @@ for tweet in list(data.keys()):
             language = detector.detect_language_of(text)
             language = language._name_
             count+= 1
-            print(count)
         except:
             language = "error"
+        
+        if language == "SERBIAN":
+            print(f'{polarity(text)}: {text}')
         
 
         if language not in tweets_sentiment:
             tweets_sentiment[language] = {}
         if date not in tweets_sentiment[language]:
             tweets_sentiment[language][date] = 0
-
-        tweets_sentiment[language][date] += polarity(text)
+        translated_text = translate_text_to_english(text)
+        vs = analyzer.polarity_scores(translated_text)
+        print(vs['compound'], count)
+        tweets_sentiment[language][date] += vs['compound']
 
 
         
