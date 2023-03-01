@@ -48,8 +48,12 @@ for tweet in list(data.keys()):
             tweets_sentiment[language] = {}
         if date not in tweets_sentiment[language]:
             tweets_sentiment[language][date] = 0
-        translated_text = translate_text_to_english(text)
-        vs = analyzer.polarity_scores(translated_text)
+
+        vs = analyzer.polarity_scores(text)
+        if(vs['compound'] == 0):
+            text = translate_text_to_english(text)
+            vs = analyzer.polarity_scores(text)
+        
         print(vs['compound'], count)
         tweets_sentiment[language][date] += vs['compound']
 
